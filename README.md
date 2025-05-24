@@ -1,5 +1,8 @@
 # Website Trading Analysis Project
-This this the file for project in ENG-494 Extra Curriculum Activity in Engineering 4
+This website is respresent for project in ENG-494 Extra Curriculum Activity in Engineering 4.
+<br>
+The website is using data from The Stock Exchange of Thailand (SET) to show SMART Marketplace that will be helpful for Inverstor. This website can show the Stock Real-time Price and Trend of the price. 
+Invertor can using the Technical Analysis like MACD, RSI or Parabolic SAR for their consider.
 
 ## Team Members
 | Name       |      Student ID   |     GitHub ID     |
@@ -21,6 +24,7 @@ This this the file for project in ENG-494 Extra Curriculum Activity in Engineeri
         $ cd ENG494 Project/
 
 2. Download and Install Python
+
     Link for download : [Python](https://www.python.org/downloads/)
 
 3. Update python pip to the current version
