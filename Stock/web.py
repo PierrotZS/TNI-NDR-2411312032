@@ -2,7 +2,7 @@ import streamlit as st
 from annotated_text import annotated_text
 import altair as alt
 import pandas as pd
-from functions import load_stock_data, calculate_trend, calculate_macd
+from functions import load_stock_data, calculate_trend, calculate_macd, calculate_rsi
 
 # Set page to wide
 st.set_page_config(layout="wide")
@@ -50,7 +50,7 @@ line_chart = alt.Chart(chart_df).mark_line(point=False, color="green").encode(
     tooltip=["วันที่", "ราคาปิด"]
 ).properties(width=700, height=400)
 
-tab1, tab2 = st.tabs(["📈 Price Chart", "📉 Price Trend"])
+tab1, tab2 = st.tabs(["📈 Price Chart", "📉 Price Trend :orange-badge[:material/star: New Feature]"])
 
 # Show chart in TAB1
 tab1.altair_chart(line_chart, use_container_width=True)
@@ -85,7 +85,13 @@ with tab2:
         ).properties(width=800, height=300)
         st.altair_chart(macd_chart, use_container_width=True)
 
-    
+    with st.expander("📊 RSI Indicator"):
+        df_rsi = calculate_rsi(df_trend)
+        rsi_chart = alt.Chart(df_rsi).mark_line(color="orange").encode(
+            x="วันที่:T",
+            y=alt.Y("RSI:Q", scale=alt.Scale(domain=[0, 100]))
+        ).properties(width=800, height=300)
+        st.altair_chart(rsi_chart, use_container_width=True)
 
 # Table of Price Details
 st.header(":orange[ราคาย้อนหลัง] :violet-badge[:material/star: New Feature]")

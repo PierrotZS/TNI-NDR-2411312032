@@ -53,3 +53,14 @@ def calculate_macd(df, short=12, long=26, signal=9):
     df["MACD"] = df["EMA_short"] - df["EMA_long"]
     df["Signal"] = df["MACD"].ewm(span=signal, adjust=False).mean()
     return df[["วันที่", "MACD", "Signal"]]
+
+def calculate_rsi(df, period=14):
+    df = df.copy()
+    delta = df["ราคาปิด"].diff()
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+    avg_gain = gain.rolling(window=period).mean()
+    avg_loss = loss.rolling(window=period).mean()
+    rs = avg_gain / avg_loss
+    df["RSI"] = 100 - (100 / (1 + rs))
+    return df[["วันที่", "RSI"]]
