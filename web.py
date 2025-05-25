@@ -2,7 +2,7 @@ import streamlit as st
 from annotated_text import annotated_text
 import altair as alt
 import pandas as pd
-from functions import load_stock_data, calculate_trend, calculate_macd, calculate_rsi, calculate_parabolic_sar
+from functions import load_stock_data, enrich_indicators, calculate_signal_score,calculate_moving_average_signal, calculate_summary_score,create_gauge_chart,calculate_macd,calculate_rsi,calculate_parabolic_sar,calculate_trend,get_signal_text
 import plotly.graph_objects as go
 
 # Set page to wide
@@ -174,3 +174,31 @@ if scp: selected_columns.append("SET เปลี่ยนแปลง(%)")
 filtered_df = df[selected_columns] if option == "ทั้งหมด" else df[selected_columns].head(int(option))
 if not filtered_df.empty:
     st.dataframe(filtered_df)
+
+# enrich indicators
+df = enrich_indicators(df)
+
+# คำนวณคะแนนแต่ละตัว
+tech_score = calculate_signal_score(df)
+ma_score = calculate_moving_average_signal(df)
+summary_score = calculate_summary_score(tech_score, ma_score)
+
+# แปลงคะแนนเป็นข้อความ
+tech_signal = get_signal_text(tech_score)
+ma_signal = get_signal_text(ma_score)
+summary_signal = get_signal_text(summary_score)
+
+# แสดงใน 3 คอลัมน์
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown("#### ตัวชี้วัดทางเทคนิค")
+    st.plotly_chart(create_gauge_chart(tech_score, "ตัวชี้วัดทางเทคนิค", "black", tech_signal), use_container_width=True)
+
+with col2:
+    st.markdown("### สรุป")
+    st.plotly_chart(create_gauge_chart(summary_score, "สรุป", "black", summary_signal), use_container_width=True)
+
+with col3:
+    st.markdown("#### ค่าเฉลี่ยเคลื่อนที่")
+    st.plotly_chart(create_gauge_chart(ma_score, "ค่าเฉลี่ยเคลื่อนที่", "black", ma_signal), use_container_width=True)
