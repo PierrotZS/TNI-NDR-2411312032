@@ -159,3 +159,56 @@ chart = (actual_line + trend_line).properties(
 
 # Show in Streamlit
 tab2.altair_chart(chart, use_container_width=True)
+
+st.header(":orange[ราคาย้อนหลัง] :violet-badge[:material/star: New Feature]")
+
+col1, col2, col3, col4 = st.columns(4)
+
+# Column selection using checkboxes
+with col1:
+    st.subheader("ข้อมูลย้อนหลัง 6 เดือน")
+    popover = st.popover("Customize")
+    opp = popover.checkbox("ราคาเปิด", True)
+    mxp = popover.checkbox("ราคาสูงสุด", True)
+    lwp = popover.checkbox("ราคาต่ำสุด", True)
+    avp = popover.checkbox("ราคาเฉลี่ย", True)
+    clp = popover.checkbox("ราคาปิด", True)
+    chg = popover.checkbox("เปลี่ยนแปลง", True)
+    cgp = popover.checkbox("เปลี่ยนแปลง (%)", True)
+    vol = popover.checkbox("ปริมาณ ('000 หุ้น)", True)
+    val = popover.checkbox("มูลค่า (ล้านบาท)", True)
+    sti = popover.checkbox("SET Index", True)
+    scp = popover.checkbox("เปลี่ยนแปลง SET (%)", True)
+
+# Number of rows to show
+with col4:
+    option = st.selectbox(
+        "แสดงข้อมูล",
+        ("10", "20", "50", "100", "ทั้งหมด"),
+        index=1,
+        placeholder="เลือกแสดงข้อมูล",
+    )
+
+# Determine selected columns
+selected_columns = ["วันที่"]
+if opp: selected_columns.append("ราคาเปิด")
+if mxp: selected_columns.append("ราคาสูงสุด")
+if lwp: selected_columns.append("ราคาต่ำสุด")
+if avp: selected_columns.append("ราคาเฉลี่ย")
+if clp: selected_columns.append("ราคาปิด")
+if chg: selected_columns.append("เปลี่ยนแปลง")
+if cgp: selected_columns.append("เปลี่ยนแปลง(%)")
+if vol: selected_columns.append("ปริมาณ(พันหุ้น)")
+if val: selected_columns.append("มูลค่า(ล้านบาท)")
+if sti: selected_columns.append("SET Index")
+if scp: selected_columns.append("SET เปลี่ยนแปลง(%)")
+
+# Filter rows
+if option == "ทั้งหมด":
+    filtered_df = df[selected_columns]
+else:
+    filtered_df = df[selected_columns].head(int(option))
+
+# Display table
+if not filtered_df.empty:
+    st.dataframe(filtered_df)
