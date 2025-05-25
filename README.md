@@ -4,6 +4,9 @@ This website is respresent for project in ENG-494 Extra Curriculum Activity in E
 The website is using data from The Stock Exchange of Thailand (SET) to show SMART Marketplace that will be helpful for Inverstor. This website can show the Stock Real-time Price and Trend of the price. 
 Invertor can using the Technical Analysis like MACD, RSI or Parabolic SAR for their consider.
 
+## Example
+You can visit at : [PierrotTrade](https://pierrotstock.streamlit.app/)
+
 ## Team Members
 | Name       |      Student ID   |     GitHub ID     |
 |------------|------------------|:-----------------:|
@@ -16,6 +19,7 @@ Invertor can using the Technical Analysis like MACD, RSI or Parabolic SAR for th
     * Pandas    ![Pandas](https://img.shields.io/pypi/v/pandas.svg?logo=pandas&logoColor=white&label=Pandas)
     * Numpy     ![Numpy](https://img.shields.io/pypi/v/numpy.svg?logo=numpy&logoColor=white&label=Numpy)
     * Scikit-learn     ![Numpy](https://img.shields.io/pypi/v/scikit-learn.svg?logo=scikit-learn&logoColor=white&label=Scikit-learn)
+    * Altair     ![Altair](https://img.shields.io/pypi/v/altair.svg?logo=altair&logoColor=white&label=Altair)
     * Annotated Text     ![Annotated_text](https://img.shields.io/pypi/v/annotated_text.svg?logo=annotated_text&logoColor=white&label=Annotated_Text)
 
 ### Steps for starting application

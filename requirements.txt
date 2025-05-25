@@ -3,4 +3,4 @@ pandas~=2.2.3
 numpy~=2.2.6
 scikit-learn~=1.6.1
 annotated_text~=4.0.2
-pandas-ta~=0.3.14b0
+altair~=5.5.0
