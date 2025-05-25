@@ -2,11 +2,12 @@ import streamlit as st
 from annotated_text import annotated_text
 import altair as alt
 import pandas as pd
-from sklearn.linear_model import LinearRegression
-from functions import load_stock_data
+from functions import load_stock_data, calculate_trend
 
+# Set page to wide
 st.set_page_config(layout="wide")
 
+# Sidebar
 with st.sidebar:
     st.title("**:money_with_wings: :orange[Set] Thailand :green[Stock]**")
     select_stock = st.selectbox("เลือกหุ้น", ("ADVANC", "KBANK"), index=0)
@@ -25,102 +26,54 @@ high_price = f"{latest_row['ราคาสูงสุด']:.2f}"
 
 # Sidebar
 with st.sidebar:
-
-    annotated_text(
-        (f"**{stock_name}**", f"{company_name}"),
-    )
-    st.metric(
-        label="**ราคาปิดล่าสุด (Latest Closing Price)**",
-        value=closing_price_str,
-        delta=f"{change_str} ({change_percent_str})",
-        border=True
-    )
-
+    annotated_text((f"**{stock_name}**", f"{company_name}"))
+    st.metric("**ราคาปิดล่าสุด (Latest Closing Price)**", closing_price_str, f"{change_str} ({change_percent_str})", border=True)
     p1, p2 = st.columns(2)
-    with p1:
-        st.subheader(f"**ต่ำสุด: :red[{low_price}]**")
-    with p2:
-        st.subheader(f"**สูงสุด: :green[{high_price}]**")
-    st.metric(
-        label="**ปริมาณการซื้อขาย ('000 หุ้น)**",
-        value=volumn_str,
-        border=True
-    )
-    st.metric(
-        label="**มูลค่าการซื้อขาย (ล้านบาท)**",
-        value=value_str,
-        border=True
-    )
+    with p1: st.subheader(f"**ต่ำสุด: :red[{low_price}]**")
+    with p2: st.subheader(f"**สูงสุด: :green[{high_price}]**")
+    st.metric("**ปริมาณการซื้อขาย ('000 หุ้น)**", volumn_str, border=True)
+    st.metric("**มูลค่าการซื้อขาย (ล้านบาท)**", value_str, border=True)
 
 # Main content
 with st.container(border=True):
     st.title(f"**:green[{stock_name}]**")
     st.subheader(f":blue[{company_name}]")
 
+#Graph of Price
 st.header(":orange[กราฟราคาย้อนหลัง**]")
-# Prepare data
 chart_df = df[["วันที่", "ราคาปิด", "ราคาสูงสุด", "ราคาต่ำสุด"]].copy()
+y_min, y_max = chart_df["ราคาต่ำสุด"].min(), chart_df["ราคาสูงสุด"].max()
 
-# Calculate Y-axis limits
-y_min = chart_df["ราคาต่ำสุด"].min() 
-y_max = chart_df["ราคาสูงสุด"].max() 
-
-# Build the chart
-line_chart = alt.Chart(chart_df).mark_line(point=False,color="green").encode(
+line_chart = alt.Chart(chart_df).mark_line(point=False, color="green").encode(
     x=alt.X("วันที่:T", title="เดือน", axis=alt.Axis(format="%b", tickCount="month")),
     y=alt.Y("ราคาปิด:Q", scale=alt.Scale(domain=[y_min, y_max]), title="ราคา"),
     tooltip=["วันที่", "ราคาปิด"]
-).properties(
-    width=700,
-    height=400,
-)
+).properties(width=700, height=400)
 
 tab1, tab2 = st.tabs(["📈 Price Chart", "📉 Price Trend"])
 
-# Show chart
+# Show chart in TAB1
 tab1.altair_chart(line_chart, use_container_width=True)
 
-# Sort and convert date
-df_sorted = df.sort_values("วันที่").copy()
-df_sorted["วันที่"] = pd.to_datetime(df_sorted["วันที่"])  # Ensure datetime64[ns]
+#Trend of Price
+df_trend = calculate_trend(df)
+y_min, y_max = df_trend["ราคาต่ำสุด"].min(), df_trend["ราคาสูงสุด"].max()
 
-# Prepare regression
-X = df_sorted["วันที่"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
-y = df_sorted["ราคาปิด"].values
-model = LinearRegression()
-model.fit(X, y)
-df_sorted["Trend"] = model.predict(X)
-
-# Calculate Y-axis limits from ราคาต่ำสุด and ราคาสูงสุด
-y_min = df_sorted["ราคาต่ำสุด"].min()
-y_max = df_sorted["ราคาสูงสุด"].max()
-
-# Chart setup
-base = alt.Chart(df_sorted).encode(
-    x=alt.X("วันที่:T", title="เดือน", axis=alt.Axis(format="%b", tickCount="month"))  # Month only
+base = alt.Chart(df_trend).encode(
+    x=alt.X("วันที่:T", title="เดือน", axis=alt.Axis(format="%b", tickCount="month"))
 )
-
 actual_line = base.mark_line(color="blue").encode(
     y=alt.Y("ราคาปิด:Q", title="ราคาปิด", scale=alt.Scale(domain=[y_min, y_max])),
     tooltip=["วันที่", "ราคาปิด"]
 )
+trend_line = base.mark_line(color="red", strokeDash=[5, 5]).encode(y="Trend:Q")
+chart = (actual_line + trend_line).properties(title="📈 แนวโน้มราคาปิด (พร้อมเส้นแนวโน้ม)", width=800, height=400)
 
-trend_line = base.mark_line(color="red", strokeDash=[5, 5]).encode(
-    y=alt.Y("Trend:Q")
-)
-
-# Combine chart
-chart = (actual_line + trend_line).properties(
-    title="📈 แนวโน้มราคาปิด (พร้อมเส้นแนวโน้ม)",
-    width=800,
-    height=400
-)
-
-# Show in Streamlit
+# Show chart in TAB2
 tab2.altair_chart(chart, use_container_width=True)
 
+# Table of Price Details
 st.header(":orange[ราคาย้อนหลัง] :violet-badge[:material/star: New Feature]")
-
 col1, col2, col3, col4 = st.columns(4)
 
 # Column selection using checkboxes
@@ -141,12 +94,7 @@ with col1:
 
 # Number of rows to show
 with col4:
-    option = st.selectbox(
-        "แสดงข้อมูล",
-        ("10", "20", "50", "100", "ทั้งหมด"),
-        index=1,
-        placeholder="เลือกแสดงข้อมูล",
-    )
+    option = st.selectbox("แสดงข้อมูล", ("10", "20", "50", "100", "ทั้งหมด"), index=1)
 
 # Determine selected columns
 selected_columns = ["วันที่"]
@@ -162,12 +110,7 @@ if val: selected_columns.append("มูลค่า(ล้านบาท)")
 if sti: selected_columns.append("SET Index")
 if scp: selected_columns.append("SET เปลี่ยนแปลง(%)")
 
-# Filter rows
-if option == "ทั้งหมด":
-    filtered_df = df[selected_columns]
-else:
-    filtered_df = df[selected_columns].head(int(option))
-
-# Display table
+# Filter rows and Display
+filtered_df = df[selected_columns] if option == "ทั้งหมด" else df[selected_columns].head(int(option))
 if not filtered_df.empty:
     st.dataframe(filtered_df)

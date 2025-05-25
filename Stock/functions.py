@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.linear_model import LinearRegression
 
 thai_months = {
     "ม.ค.": "01", "ก.พ.": "02", "มี.ค.": "03", "เม.ย.": "04",
@@ -33,3 +34,13 @@ def load_stock_data(filepath, sheet):
     df = df.dropna()
     df["วันที่"] = df["วันที่"].dt.date
     return stock_name, company_name, df
+
+def calculate_trend(df):
+    df_sorted = df.sort_values("วันที่").copy()
+    df_sorted["วันที่"] = pd.to_datetime(df_sorted["วันที่"])
+    X = df_sorted["วันที่"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
+    y = df_sorted["ราคาปิด"].values
+    model = LinearRegression()
+    model.fit(X, y)
+    df_sorted["Trend"] = model.predict(X)
+    return df_sorted
