@@ -12,7 +12,7 @@ with st.sidebar:
     st.title("**:money_with_wings: :orange[Set] Thailand :green[Stock]**")
     select_stock = st.selectbox("เลือกหุ้น", ("ADVANC", "KBANK"), index=0)
 
-stock_name, company_name, df = load_stock_data("Stock-Price.xlsx", select_stock)
+stock_name, company_name, df = load_stock_data("Stock/Stock-Price.xlsx", select_stock)
 
 # Get the first row (latest data)
 latest_row = df.iloc[0]
