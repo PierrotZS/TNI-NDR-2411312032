@@ -20,7 +20,7 @@ You can visit at : [PierrotTrade](https://pierrotstock.streamlit.app/)
     * Numpy     ![Numpy](https://img.shields.io/pypi/v/numpy.svg?logo=numpy&logoColor=white&label=Numpy)
     * Scikit-learn     ![Numpy](https://img.shields.io/pypi/v/scikit-learn.svg?logo=scikit-learn&logoColor=white&label=Scikit-learn)
     * Altair     ![Altair](https://img.shields.io/pypi/v/altair.svg?logo=altair&logoColor=white&label=Altair)
-    * Annotated Text     ![Annotated_text](https://img.shields.io/pypi/v/annotated_text.svg?logo=annotated_text&logoColor=white&label=Annotated_Text)
+    * st-Annotated Text     ![st-Annotated_text](https://img.shields.io/pypi/v/st-annotated-text.svg?logo=st-annotated-text&logoColor=white&label=st-Annotated_Text)
 
 ### Steps for starting application
 1. Clone this project and change directory to be `Stock`.
