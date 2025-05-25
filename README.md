@@ -16,12 +16,13 @@ Invertor can using the Technical Analysis like MACD, RSI or Parabolic SAR for th
     * Pandas    ![Pandas](https://img.shields.io/pypi/v/pandas.svg?logo=pandas&logoColor=white&label=Pandas)
     * Numpy     ![Numpy](https://img.shields.io/pypi/v/numpy.svg?logo=numpy&logoColor=white&label=Numpy)
     * Scikit-learn     ![Numpy](https://img.shields.io/pypi/v/scikit-learn.svg?logo=scikit-learn&logoColor=white&label=Scikit-learn)
+    * Annotated Text     ![Annotated_text](https://img.shields.io/pypi/v/annotated_text.svg?logo=annotated_text&logoColor=white&label=Annotated_Text)
 
 ### Steps for starting application
-1. Clone this project and change directory to be `ENG494 Project`.
+1. Clone this project and change directory to be `Stock`.
        
         $ git clone https://github.com/PierrotZS/TNI-NDR-2411312032.git
-        $ cd ENG494 Project/
+        $ cd Stock/
 
 2. Download and Install Python
 
