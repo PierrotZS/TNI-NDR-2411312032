@@ -197,7 +197,7 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     st.markdown("#### ตัวชี้วัดทางเทคนิค")
-    st.plotly_chart(create_gauge_chart(tech_score, "ตัวชี้วัดทางเทคนิค", "black", tech_signal), use_container_width=True)
+    st.plotly_chart(create_gauge_chart(tech_score, "ตัวชี้วัดทางเทคนิค", "black", tech_score), use_container_width=True)
 
 with col2:
     st.markdown("### สรุป")
@@ -205,4 +205,4 @@ with col2:
 
 with col3:
     st.markdown("#### ค่าเฉลี่ยเคลื่อนที่")
-    st.plotly_chart(create_gauge_chart(ma_score, "ค่าเฉลี่ยเคลื่อนที่", "black", ma_signal), use_container_width=True)
+    st.plotly_chart(create_gauge_chart(ma_score, "ค่าเฉลี่ยเคลื่อนที่", "black", ma_score), use_container_width=True)
