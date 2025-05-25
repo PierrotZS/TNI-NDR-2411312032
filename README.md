@@ -5,7 +5,8 @@ The website is using data from The Stock Exchange of Thailand (SET) to show SMAR
 Invertor can using the Technical Analysis like MACD, RSI or Parabolic SAR for their consider.
 
 ## Example
-You can visit at : [PierrotTrade](https://stockpierrot.streamlit.app/)
+You can visit at : [PierrotTrade](https://stockpierrot.streamlit.app/) 
+Slide Presentation : [Slide](https://www.canva.com/design/DAGofQh4nHo/jVZIaPWUaDjhoJvqLnaKVA/edit?utm_content=DAGofQh4nHo&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 
 ## Team Members
 | Name       |      Student ID   |     GitHub ID     |
