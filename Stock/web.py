@@ -1,58 +1,17 @@
 import streamlit as st
-import pandas as pd
-import altair as alt
 from annotated_text import annotated_text
+import altair as alt
+import pandas as pd
 from sklearn.linear_model import LinearRegression
+from functions import load_stock_data
 
 st.set_page_config(layout="wide")
 
 with st.sidebar:
     st.title("**:money_with_wings: :orange[Set] Thailand :green[Stock]**")
-    select_stock = st.selectbox(
-        "เลือกหุ้น",
-        ("ADVANC", "KBANK"),
-        index=0,
-        placeholder="เลือกหุ้นเพื่อแสดงข้อมูล",
-    )
+    select_stock = st.selectbox("เลือกหุ้น", ("ADVANC", "KBANK"), index=0)
 
-meta_df = pd.read_excel("Stock-Price.xlsx", sheet_name=select_stock, nrows=2, header=None)
-stock_name = meta_df.iloc[0, 0]  
-company_name = meta_df.iloc[1, 0] 
-
-# Define Stock-Price file location
-df = pd.read_excel("Stock-Price.xlsx", sheet_name="ADVANC", skiprows=3)
-
-# Rename columns
-df.columns = [
-    "วันที่", "ราคาเปิด", "ราคาสูงสุด", "ราคาต่ำสุด", "ราคาเฉลี่ย", "ราคาปิด",
-    "เปลี่ยนแปลง", "เปลี่ยนแปลง(%)", "ปริมาณ(พันหุ้น)", "มูลค่า(ล้านบาท)",
-    "SET Index", "SET เปลี่ยนแปลง(%)"
-]
-
-# Thai month conversion
-thai_months = {
-    "ม.ค.": "01", "ก.พ.": "02", "มี.ค.": "03", "เม.ย.": "04",
-    "พ.ค.": "05", "มิ.ย.": "06", "ก.ค.": "07", "ส.ค.": "08",
-    "ก.ย.": "09", "ต.ค.": "10", "พ.ย.": "11", "ธ.ค.": "12"
-}
-
-def convert_thai_date(thai_date_str):
-    for th, num in thai_months.items():
-        if th in thai_date_str:
-            parts = thai_date_str.replace(",", "").split()
-            if len(parts) == 3:
-                day, month_th, year_th = parts
-                month = thai_months.get(month_th)
-                year = int(year_th) - 543
-                return f"{year}-{month}-{int(day):02d}"
-    return None
-
-# Clean and convert date column
-df = df[~df["วันที่"].isna() & ~df["วันที่"].astype(str).str.contains("วันที่")]
-df["วันที่"] = df["วันที่"].astype(str).apply(convert_thai_date)
-df["วันที่"] = pd.to_datetime(df["วันที่"], errors="coerce")
-df = df.dropna()
-df["วันที่"] = df["วันที่"].dt.date
+stock_name, company_name, df = load_stock_data("Stock-Price.xlsx", select_stock)
 
 # Get the first row (latest data)
 latest_row = df.iloc[0]
