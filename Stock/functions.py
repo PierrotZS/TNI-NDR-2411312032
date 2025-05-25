@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+import numpy as np
 
 thai_months = {
     "ม.ค.": "01", "ก.พ.": "02", "มี.ค.": "03", "เม.ย.": "04",
@@ -44,3 +45,11 @@ def calculate_trend(df):
     model.fit(X, y)
     df_sorted["Trend"] = model.predict(X)
     return df_sorted
+
+def calculate_macd(df, short=12, long=26, signal=9):
+    df = df.copy()
+    df["EMA_short"] = df["ราคาปิด"].ewm(span=short, adjust=False).mean()
+    df["EMA_long"] = df["ราคาปิด"].ewm(span=long, adjust=False).mean()
+    df["MACD"] = df["EMA_short"] - df["EMA_long"]
+    df["Signal"] = df["MACD"].ewm(span=signal, adjust=False).mean()
+    return df[["วันที่", "MACD", "Signal"]]

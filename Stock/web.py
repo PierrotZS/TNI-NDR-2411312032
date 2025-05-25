@@ -2,7 +2,7 @@ import streamlit as st
 from annotated_text import annotated_text
 import altair as alt
 import pandas as pd
-from functions import load_stock_data, calculate_trend
+from functions import load_stock_data, calculate_trend, calculate_macd
 
 # Set page to wide
 st.set_page_config(layout="wide")
@@ -70,7 +70,22 @@ trend_line = base.mark_line(color="red", strokeDash=[5, 5]).encode(y="Trend:Q")
 chart = (actual_line + trend_line).properties(title="📈 แนวโน้มราคาปิด (พร้อมเส้นแนวโน้ม)", width=800, height=400)
 
 # Show chart in TAB2
-tab2.altair_chart(chart, use_container_width=True)
+with tab2:
+    with st.expander("📈 แนวโน้มราคาปิด"):
+        st.altair_chart(chart, use_container_width=True)
+
+    with st.expander("📉 MACD Indicator"):
+        df_macd = calculate_macd(df_trend)
+        macd_chart = alt.Chart(df_macd).transform_fold(
+            ["MACD", "Signal"]
+        ).mark_line().encode(
+            x="วันที่:T",
+            y="value:Q",
+            color="key:N"
+        ).properties(width=800, height=300)
+        st.altair_chart(macd_chart, use_container_width=True)
+
+    
 
 # Table of Price Details
 st.header(":orange[ราคาย้อนหลัง] :violet-badge[:material/star: New Feature]")
