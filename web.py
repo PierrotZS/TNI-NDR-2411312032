@@ -3,9 +3,10 @@ from annotated_text import annotated_text
 import altair as alt
 import pandas as pd
 from functions import load_stock_data, calculate_trend, calculate_macd, calculate_rsi, calculate_parabolic_sar
+import plotly.graph_objects as go
 
 # Set page to wide
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide",page_title="Trade Pierrot")
 
 # Sidebar
 with st.sidebar:
@@ -53,16 +54,33 @@ line_chart = alt.Chart(chart_df).mark_line(point=False, color="green").encode(
 tab1, tab2 = st.tabs(["📈 Price Chart", "📉 Price Trend :orange-badge[:material/star: New Feature]"])
 
 # Show chart in TAB1
-df_sar = calculate_parabolic_sar(df)
+with tab1:
+    st.altair_chart(line_chart, use_container_width=True)
 
-sar_line = alt.Chart(df_sar).mark_circle(color="red", size=20).encode(
-    x=alt.X("วันที่:T"),
-    y=alt.Y("Parabolic_SAR:Q"),
-    tooltip=["วันที่", "Parabolic_SAR"]
-)
+    with st.expander("📊 Candlestick Chart"):
+        candle_df = df.copy()
+        candle_df["วันที่"] = pd.to_datetime(candle_df["วันที่"])
+        candle_df = candle_df.sort_values("วันที่")
 
-price_with_sar = (line_chart + sar_line).properties(title="📈 ราคาปิดพร้อม Parabolic SAR")
-tab1.altair_chart(price_with_sar, use_container_width=True)
+        fig = go.Figure(data=[go.Candlestick(
+            x=candle_df["วันที่"],
+            open=candle_df["ราคาเปิด"],
+            high=candle_df["ราคาสูงสุด"],
+            low=candle_df["ราคาต่ำสุด"],
+            close=candle_df["ราคาปิด"],
+            increasing_line_color='green',
+            decreasing_line_color='red'
+        )])
+
+        fig.update_layout(
+            title="Candlestick Chart",
+            yaxis_title="Price (Baht)",
+            xaxis_title="Date",
+            xaxis_rangeslider_visible=False,
+            height=500
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
 
 #Trend of Price
 df_trend = calculate_trend(df)
@@ -76,7 +94,7 @@ actual_line = base.mark_line(color="blue").encode(
     tooltip=["วันที่", "ราคาปิด"]
 )
 trend_line = base.mark_line(color="red", strokeDash=[5, 5]).encode(y="Trend:Q")
-chart = (actual_line + trend_line).properties(title="📈 แนวโน้มราคาปิด (พร้อมเส้นแนวโน้ม)", width=800, height=400)
+chart = (actual_line + trend_line).properties(width=800, height=400)
 
 # Show chart in TAB2
 with tab2:
@@ -101,6 +119,18 @@ with tab2:
             y=alt.Y("RSI:Q", scale=alt.Scale(domain=[0, 100]))
         ).properties(width=800, height=300)
         st.altair_chart(rsi_chart, use_container_width=True)
+
+    with st.expander("📈 Parabolic SAR"):
+        df_sar = calculate_parabolic_sar(df)
+
+        sar_line = alt.Chart(df_sar).mark_circle(color="red", size=20).encode(
+            x=alt.X("วันที่:T"),
+            y=alt.Y("Parabolic_SAR:Q"),
+            tooltip=["วันที่", "Parabolic_SAR"]
+        )
+
+        price_with_sar = (line_chart + sar_line)
+        st.altair_chart(price_with_sar, use_container_width=True)
 
 # Table of Price Details
 st.header(":orange[ราคาย้อนหลัง] :violet-badge[:material/star: New Feature]")
