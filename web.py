@@ -2,17 +2,18 @@ import streamlit as st
 from annotated_text import annotated_text
 import altair as alt
 import pandas as pd
-from functions import load_stock_data, calculate_trend
+from functions import load_stock_data, enrich_indicators, calculate_signal_score,calculate_moving_average_signal, calculate_summary_score,create_gauge_chart,calculate_macd,calculate_rsi,calculate_parabolic_sar,calculate_trend,get_signal_text
+import plotly.graph_objects as go
 
 # Set page to wide
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide",page_title="Trade Pierrot")
 
 # Sidebar
 with st.sidebar:
     st.title("**:money_with_wings: :orange[Set] Thailand :green[Stock]**")
     select_stock = st.selectbox("เลือกหุ้น", ("ADVANC", "KBANK"), index=0)
 
-stock_name, company_name, df = load_stock_data("Stock-Price.xlsx", select_stock)
+stock_name, company_name, df = load_stock_data("Stock/Stock-Price.xlsx", select_stock)
 
 # Get the first row (latest data)
 latest_row = df.iloc[0]
@@ -50,10 +51,36 @@ line_chart = alt.Chart(chart_df).mark_line(point=False, color="green").encode(
     tooltip=["วันที่", "ราคาปิด"]
 ).properties(width=700, height=400)
 
-tab1, tab2 = st.tabs(["📈 Price Chart", "📉 Price Trend"])
+tab1, tab2 = st.tabs(["📈 Price Chart", "📉 Price Trend :orange-badge[:material/star: New Feature]"])
 
 # Show chart in TAB1
-tab1.altair_chart(line_chart, use_container_width=True)
+with tab1:
+    st.altair_chart(line_chart, use_container_width=True)
+
+    with st.expander("📊 Candlestick Chart"):
+        candle_df = df.copy()
+        candle_df["วันที่"] = pd.to_datetime(candle_df["วันที่"])
+        candle_df = candle_df.sort_values("วันที่")
+
+        fig = go.Figure(data=[go.Candlestick(
+            x=candle_df["วันที่"],
+            open=candle_df["ราคาเปิด"],
+            high=candle_df["ราคาสูงสุด"],
+            low=candle_df["ราคาต่ำสุด"],
+            close=candle_df["ราคาปิด"],
+            increasing_line_color='green',
+            decreasing_line_color='red'
+        )])
+
+        fig.update_layout(
+            title="Candlestick Chart",
+            yaxis_title="Price (Baht)",
+            xaxis_title="Date",
+            xaxis_rangeslider_visible=False,
+            height=500
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
 
 #Trend of Price
 df_trend = calculate_trend(df)
@@ -67,10 +94,43 @@ actual_line = base.mark_line(color="blue").encode(
     tooltip=["วันที่", "ราคาปิด"]
 )
 trend_line = base.mark_line(color="red", strokeDash=[5, 5]).encode(y="Trend:Q")
-chart = (actual_line + trend_line).properties(title="📈 แนวโน้มราคาปิด (พร้อมเส้นแนวโน้ม)", width=800, height=400)
+chart = (actual_line + trend_line).properties(width=800, height=400)
 
 # Show chart in TAB2
-tab2.altair_chart(chart, use_container_width=True)
+with tab2:
+    with st.expander("📈 แนวโน้มราคาปิด"):
+        st.altair_chart(chart, use_container_width=True)
+
+    with st.expander("📉 MACD Indicator"):
+        df_macd = calculate_macd(df_trend)
+        macd_chart = alt.Chart(df_macd).transform_fold(
+            ["MACD", "Signal"]
+        ).mark_line().encode(
+            x="วันที่:T",
+            y="value:Q",
+            color="key:N"
+        ).properties(width=800, height=300)
+        st.altair_chart(macd_chart, use_container_width=True)
+
+    with st.expander("📊 RSI Indicator"):
+        df_rsi = calculate_rsi(df_trend)
+        rsi_chart = alt.Chart(df_rsi).mark_line(color="orange").encode(
+            x="วันที่:T",
+            y=alt.Y("RSI:Q", scale=alt.Scale(domain=[0, 100]))
+        ).properties(width=800, height=300)
+        st.altair_chart(rsi_chart, use_container_width=True)
+
+    with st.expander("📈 Parabolic SAR"):
+        df_sar = calculate_parabolic_sar(df)
+
+        sar_line = alt.Chart(df_sar).mark_circle(color="red", size=20).encode(
+            x=alt.X("วันที่:T"),
+            y=alt.Y("Parabolic_SAR:Q"),
+            tooltip=["วันที่", "Parabolic_SAR"]
+        )
+
+        price_with_sar = (line_chart + sar_line)
+        st.altair_chart(price_with_sar, use_container_width=True)
 
 # Table of Price Details
 st.header(":orange[ราคาย้อนหลัง] :violet-badge[:material/star: New Feature]")
@@ -114,3 +174,31 @@ if scp: selected_columns.append("SET เปลี่ยนแปลง(%)")
 filtered_df = df[selected_columns] if option == "ทั้งหมด" else df[selected_columns].head(int(option))
 if not filtered_df.empty:
     st.dataframe(filtered_df)
+
+# enrich indicators
+df = enrich_indicators(df)
+
+# คำนวณคะแนนแต่ละตัว
+tech_score = calculate_signal_score(df)
+ma_score = calculate_moving_average_signal(df)
+summary_score = calculate_summary_score(tech_score, ma_score)
+
+# แปลงคะแนนเป็นข้อความ
+tech_signal = get_signal_text(tech_score)
+ma_signal = get_signal_text(ma_score)
+summary_signal = get_signal_text(summary_score)
+
+# แสดงใน 3 คอลัมน์
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown("#### ตัวชี้วัดทางเทคนิค")
+    st.plotly_chart(create_gauge_chart(tech_score, "ตัวชี้วัดทางเทคนิค", "black", tech_signal), use_container_width=True)
+
+with col2:
+    st.markdown("### สรุป")
+    st.plotly_chart(create_gauge_chart(summary_score, "สรุป", "black", summary_signal), use_container_width=True)
+
+with col3:
+    st.markdown("#### ค่าเฉลี่ยเคลื่อนที่")
+    st.plotly_chart(create_gauge_chart(ma_score, "ค่าเฉลี่ยเคลื่อนที่", "black", ma_signal), use_container_width=True)
