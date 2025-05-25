@@ -12,6 +12,7 @@ st.set_page_config(layout="wide",page_title="Trade Pierrot")
 df_all = pd.read_excel("Stock/Stock-Price.xlsx")
 stock_list = df_all["Stock"].unique().tolist()  # Adjust "Stock" to match your column name
 
+
 # Sidebar
 with st.sidebar:
     st.title("**:money_with_wings: :orange[Set] Thailand :green[Stock]**")

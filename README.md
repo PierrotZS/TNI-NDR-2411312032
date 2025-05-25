@@ -47,6 +47,3 @@ You can visit at : [PierrotTrade](https://stockpierrot.streamlit.app/)
     or in case it doesn't work
 
         $ python -m streamlit run web.py
-
-
-
