@@ -5,6 +5,16 @@ st.set_page_config(layout="wide")
 
 with st.sidebar:
     st.title("**:money_with_wings: :orange[Set] Thailand :green[Stock]**")
+    select_stock = st.selectbox(
+        "เลือกหุ้น",
+        ("ADVANC", "KBANK"),
+        index=0,
+        placeholder="เลือกหุ้นเพื่อแสดงข้อมูล",
+    )
+
+meta_df = pd.read_excel("Stock-Price.xlsx", sheet_name=select_stock, nrows=2, header=None)
+stock_name = meta_df.iloc[0, 0]  
+company_name = meta_df.iloc[1, 0] 
 
 # Define Stock-Price file location
 df = pd.read_excel("Stock-Price.xlsx", sheet_name="ADVANC", skiprows=3)
@@ -76,3 +86,8 @@ with st.sidebar:
         value=value_str,
         border=True
     )
+
+# Main content
+with st.container(border=True):
+    st.title(f"**:green[{stock_name}]**")
+    st.subheader(f":blue[{company_name}]")
