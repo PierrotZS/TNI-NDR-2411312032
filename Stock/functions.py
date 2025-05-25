@@ -64,3 +64,45 @@ def calculate_rsi(df, period=14):
     rs = avg_gain / avg_loss
     df["RSI"] = 100 - (100 / (1 + rs))
     return df[["วันที่", "RSI"]]
+
+def calculate_parabolic_sar(df, af=0.02, max_af=0.2):
+    df = df.copy()
+    high = df["ราคาสูงสุด"].values
+    low = df["ราคาต่ำสุด"].values
+    close = df["ราคาปิด"].values
+
+    psar = close.copy()
+    psar[0] = low[0]  # start with initial PSAR
+    bull = True
+    ep = high[0]  # extreme point
+    af_val = af
+
+    for i in range(1, len(close)):
+        prev_psar = psar[i - 1]
+
+        if bull:
+            psar[i] = prev_psar + af_val * (ep - prev_psar)
+            if low[i] < psar[i]:
+                bull = False
+                psar[i] = ep
+                ep = low[i]
+                af_val = af
+        else:
+            psar[i] = prev_psar + af_val * (ep - prev_psar)
+            if high[i] > psar[i]:
+                bull = True
+                psar[i] = ep
+                ep = high[i]
+                af_val = af
+
+        if bull:
+            if high[i] > ep:
+                ep = high[i]
+                af_val = min(af_val + af, max_af)
+        else:
+            if low[i] < ep:
+                ep = low[i]
+                af_val = min(af_val + af, max_af)
+
+    df["Parabolic_SAR"] = psar
+    return df[["วันที่", "Parabolic_SAR"]]

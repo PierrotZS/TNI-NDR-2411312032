@@ -2,7 +2,7 @@ import streamlit as st
 from annotated_text import annotated_text
 import altair as alt
 import pandas as pd
-from functions import load_stock_data, calculate_trend, calculate_macd, calculate_rsi
+from functions import load_stock_data, calculate_trend, calculate_macd, calculate_rsi, calculate_parabolic_sar
 
 # Set page to wide
 st.set_page_config(layout="wide")
@@ -53,7 +53,16 @@ line_chart = alt.Chart(chart_df).mark_line(point=False, color="green").encode(
 tab1, tab2 = st.tabs(["📈 Price Chart", "📉 Price Trend :orange-badge[:material/star: New Feature]"])
 
 # Show chart in TAB1
-tab1.altair_chart(line_chart, use_container_width=True)
+df_sar = calculate_parabolic_sar(df)
+
+sar_line = alt.Chart(df_sar).mark_circle(color="red", size=20).encode(
+    x=alt.X("วันที่:T"),
+    y=alt.Y("Parabolic_SAR:Q"),
+    tooltip=["วันที่", "Parabolic_SAR"]
+)
+
+price_with_sar = (line_chart + sar_line).properties(title="📈 ราคาปิดพร้อม Parabolic SAR")
+tab1.altair_chart(price_with_sar, use_container_width=True)
 
 #Trend of Price
 df_trend = calculate_trend(df)
