@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 from annotated_text import annotated_text
+from sklearn.linear_model import LinearRegression
 
 st.set_page_config(layout="wide")
 
@@ -119,3 +120,42 @@ tab1, tab2 = st.tabs(["📈 Price Chart", "📉 Price Trend"])
 
 # Show chart
 tab1.altair_chart(line_chart, use_container_width=True)
+
+# Sort and convert date
+df_sorted = df.sort_values("วันที่").copy()
+df_sorted["วันที่"] = pd.to_datetime(df_sorted["วันที่"])  # Ensure datetime64[ns]
+
+# Prepare regression
+X = df_sorted["วันที่"].map(pd.Timestamp.toordinal).values.reshape(-1, 1)
+y = df_sorted["ราคาปิด"].values
+model = LinearRegression()
+model.fit(X, y)
+df_sorted["Trend"] = model.predict(X)
+
+# Calculate Y-axis limits from ราคาต่ำสุด and ราคาสูงสุด
+y_min = df_sorted["ราคาต่ำสุด"].min()
+y_max = df_sorted["ราคาสูงสุด"].max()
+
+# Chart setup
+base = alt.Chart(df_sorted).encode(
+    x=alt.X("วันที่:T", title="เดือน", axis=alt.Axis(format="%b", tickCount="month"))  # Month only
+)
+
+actual_line = base.mark_line(color="blue").encode(
+    y=alt.Y("ราคาปิด:Q", title="ราคาปิด", scale=alt.Scale(domain=[y_min, y_max])),
+    tooltip=["วันที่", "ราคาปิด"]
+)
+
+trend_line = base.mark_line(color="red", strokeDash=[5, 5]).encode(
+    y=alt.Y("Trend:Q")
+)
+
+# Combine chart
+chart = (actual_line + trend_line).properties(
+    title="📈 แนวโน้มราคาปิด (พร้อมเส้นแนวโน้ม)",
+    width=800,
+    height=400
+)
+
+# Show in Streamlit
+tab2.altair_chart(chart, use_container_width=True)
