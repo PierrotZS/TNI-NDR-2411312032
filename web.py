@@ -8,10 +8,14 @@ import plotly.graph_objects as go
 # Set page to wide
 st.set_page_config(layout="wide",page_title="Trade Pierrot")
 
+# Load the Excel file and get unique stock names
+df_all = pd.read_excel("Stock/Stock-Price.xlsx")
+stock_list = df_all["Stock"].unique().tolist()  # Adjust "Stock" to match your column name
+
 # Sidebar
 with st.sidebar:
     st.title("**:money_with_wings: :orange[Set] Thailand :green[Stock]**")
-    select_stock = st.selectbox("เลือกหุ้น", ("ADVANC", "KBANK"), index=0)
+    select_stock = st.selectbox("เลือกหุ้น", stock_list, index=0)
 
 stock_name, company_name, df = load_stock_data("Stock/Stock-Price.xlsx", select_stock)
 
