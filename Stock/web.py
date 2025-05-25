@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import altair as alt
+from annotated_text import annotated_text
 
 st.set_page_config(layout="wide")
 
@@ -64,6 +66,9 @@ high_price = f"{latest_row['ราคาสูงสุด']:.2f}"
 # Sidebar
 with st.sidebar:
 
+    annotated_text(
+        (f"**{stock_name}**", f"{company_name}"),
+    )
     st.metric(
         label="**ราคาปิดล่าสุด (Latest Closing Price)**",
         value=closing_price_str,
@@ -91,3 +96,26 @@ with st.sidebar:
 with st.container(border=True):
     st.title(f"**:green[{stock_name}]**")
     st.subheader(f":blue[{company_name}]")
+
+st.header(":orange[กราฟราคาย้อนหลัง**]")
+# Prepare data
+chart_df = df[["วันที่", "ราคาปิด", "ราคาสูงสุด", "ราคาต่ำสุด"]].copy()
+
+# Calculate Y-axis limits
+y_min = chart_df["ราคาต่ำสุด"].min() 
+y_max = chart_df["ราคาสูงสุด"].max() 
+
+# Build the chart
+line_chart = alt.Chart(chart_df).mark_line(point=False,color="green").encode(
+    x=alt.X("วันที่:T", title="เดือน", axis=alt.Axis(format="%b", tickCount="month")),
+    y=alt.Y("ราคาปิด:Q", scale=alt.Scale(domain=[y_min, y_max]), title="ราคา"),
+    tooltip=["วันที่", "ราคาปิด"]
+).properties(
+    width=700,
+    height=400,
+)
+
+tab1, tab2 = st.tabs(["📈 Price Chart", "📉 Price Trend"])
+
+# Show chart
+tab1.altair_chart(line_chart, use_container_width=True)
