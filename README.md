@@ -23,10 +23,10 @@ You can visit at : [PierrotTrade](https://pierrotstock.streamlit.app/)
     * st-Annotated Text     ![st-Annotated_text](https://img.shields.io/pypi/v/st-annotated-text.svg?logo=st-annotated-text&logoColor=white&label=st-Annotated_Text)
 
 ### Steps for starting application
-1. Clone this project and change directory to be `Stock`.
+1. Clone this project and change directory to be `TNI-NDR-2411312032`.
        
         $ git clone https://github.com/PierrotZS/TNI-NDR-2411312032.git
-        $ cd Stock/
+        $ cd TNI-NDR-2411312032/
 
 2. Download and Install Python
 
